@@ -1434,58 +1434,158 @@
         }
 
         // ===== GOOGLE SHEETS INTEGRATION =====
+        let isSyncing = false;
+
         async function syncWithSheet(action, data) {
-            if (!sheetUrl) {
-                console.log('No sheet URL configured, using local storage');
+            if (!sheetUrl || isSyncing) {
+                console.log('No sheet URL configured or sync in progress, using local storage');
                 return null;
             }
 
+            isSyncing = true;
+            
             try {
+                // ใช้ Google Apps Script Web App ผ่าน JSONP-like approach
+                const formData = new FormData();
+                formData.append('action', action);
+                formData.append('data', JSON.stringify(data));
+                formData.append('week', currentWeek);
+
                 const response = await fetch(sheetUrl, {
                     method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ action, data, week: currentWeek })
+                    body: formData
                 });
-                return true;
+                
+                const result = await response.json();
+                isSyncing = false;
+                return result;
             } catch (error) {
                 console.error('Sheet sync error:', error);
+                isSyncing = false;
+                // ไม่แสดง error toast เพราะยังทำงานกับ local storage ได้
                 return null;
             }
         }
 
         async function loadFromSheet() {
-            if (!sheetUrl) return;
+            if (!sheetUrl) return false;
             
             try {
-                const response = await fetch(`${sheetUrl}?action=getData&week=${currentWeek}`);
-                const data = await response.json();
-                if (data) {
-                    Object.assign(appData, data);
+                const url = `${sheetUrl}?action=getData&week=${encodeURIComponent(currentWeek)}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
                 }
+                
+                const data = await response.json();
+                
+                if (data && !data.error) {
+                    // Merge data from sheet
+                    if (data.categories && data.categories.length > 0) {
+                        appData.categories = data.categories;
+                    }
+                    if (data.budgets) appData.budgets = data.budgets;
+                    if (data.expenses) appData.expenses = data.expenses;
+                    if (data.allowances) appData.allowances = data.allowances;
+                    if (data.missions) appData.missions = data.missions;
+                    if (data.rewards && data.rewards.length > 0) {
+                        appData.rewards = data.rewards;
+                    }
+                    if (typeof data.points === 'number') {
+                        appData.points = data.points;
+                    }
+                    
+                    saveDataLocal(); // บันทึกลง local storage ด้วย
+                    return true;
+                }
+                return false;
             } catch (error) {
                 console.error('Load from sheet error:', error);
+                return false;
             }
         }
 
-        function connectSheet() {
+        async function connectSheet() {
             const url = document.getElementById('sheetUrl').value.trim();
-            if (url) {
+            if (!url) {
+                showToast('กรุณาใส่ URL', 'error');
+                return;
+            }
+
+            // แสดงสถานะกำลังเชื่อมต่อ
+            showToast('กำลังเชื่อมต่อ...');
+            
+            try {
+                // ทดสอบการเชื่อมต่อ
+                const testUrl = `${url}?action=getData&week=${encodeURIComponent(currentWeek)}`;
+                const response = await fetch(testUrl);
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
                 sheetUrl = url;
                 localStorage.setItem('sheetUrl', url);
-                showToast('เชื่อมต่อ Google Sheets สำเร็จ!');
+                
+                // โหลดข้อมูลจาก Sheet
+                if (data.categories || data.budgets || data.expenses) {
+                    if (data.categories && data.categories.length > 0) {
+                        appData.categories = data.categories;
+                    }
+                    if (data.budgets) appData.budgets = data.budgets;
+                    if (data.expenses) appData.expenses = data.expenses;
+                    if (data.allowances) appData.allowances = data.allowances;
+                    if (data.missions) appData.missions = data.missions;
+                    if (data.rewards && data.rewards.length > 0) {
+                        appData.rewards = data.rewards;
+                    }
+                    if (typeof data.points === 'number') {
+                        appData.points = data.points;
+                    }
+                    saveDataLocal();
+                    renderAll();
+                }
+                
+                showToast('เชื่อมต่อ Google Sheets สำเร็จ! ✓', 'success');
                 document.getElementById('setupSection').style.display = 'none';
+                
+            } catch (error) {
+                console.error('Connection error:', error);
+                showToast('ไม่สามารถเชื่อมต่อได้ กรุณาตรวจสอบ URL และการตั้งค่า', 'error');
+            }
+        }
+
+        // ฟังก์ชันทดสอบการเชื่อมต่อ
+        async function testConnection() {
+            if (!sheetUrl) {
+                showToast('ยังไม่ได้เชื่อมต่อ Google Sheets', 'error');
+                return;
+            }
+            
+            showToast('กำลังทดสอบ...');
+            const success = await loadFromSheet();
+            
+            if (success) {
+                showToast('การเชื่อมต่อปกติ ✓', 'success');
+                renderAll();
             } else {
-                showToast('กรุณาใส่ URL', 'error');
+                showToast('การเชื่อมต่อมีปัญหา', 'error');
             }
         }
 
         // ===== LOCAL STORAGE =====
-        function saveData() {
+        function saveDataLocal() {
             localStorage.setItem('familyBudgetData', JSON.stringify(appData));
-            syncWithSheet('saveData', appData);
+        }
+
+        function saveData() {
+            saveDataLocal();
+            // Sync กับ Google Sheets แบบ async (ไม่ block)
+            if (sheetUrl) {
+                syncWithSheet('saveData', appData);
+            }
         }
 
         function loadData() {
