@@ -1598,6 +1598,21 @@
                     if (typeof data.points === 'number') {
                         appData.points = data.points;
                     }
+                    // ดึงชื่อลูกจาก Sheet
+                    if (data.childName) {
+                        childName = data.childName;
+                        localStorage.setItem('childName', childName);
+                        // อัปเดต UI ถ้าอยู่ในหน้าลูก
+                        const childHeader = document.querySelector('#childApp .header-title');
+                        if (childHeader) {
+                            childHeader.textContent = `สวัสดี ${childName}!`;
+                        }
+                        // อัปเดต input ในหน้าผู้ปกครอง
+                        const nameInput = document.getElementById('childNameInput');
+                        if (nameInput) {
+                            nameInput.value = childName;
+                        }
+                    }
                     
                     saveDataLocal(); // บันทึกลง local storage ด้วย
                     return true;
@@ -1826,7 +1841,7 @@
             showToast('เปลี่ยนรหัสผ่านสำเร็จ! 🔐', 'success');
         }
 
-        function saveChildName() {
+        async function saveChildName() {
             const name = document.getElementById('childNameInput').value.trim();
             if (!name) {
                 showToast('กรุณาใส่ชื่อ', 'error');
@@ -1835,6 +1850,23 @@
             
             childName = name;
             localStorage.setItem('childName', name);
+            
+            // บันทึกลง Google Sheets ด้วย
+            if (sheetUrl) {
+                try {
+                    const formData = new FormData();
+                    formData.append('action', 'updateChildName');
+                    formData.append('name', name);
+
+                    await fetch(sheetUrl, {
+                        method: 'POST',
+                        body: formData
+                    });
+                } catch (error) {
+                    console.error('Error saving child name to sheet:', error);
+                }
+            }
+            
             showToast('บันทึกชื่อสำเร็จ!', 'success');
         }
 
