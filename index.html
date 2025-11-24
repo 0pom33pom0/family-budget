@@ -1045,7 +1045,7 @@
     <div class="login-screen" id="loginScreen">
         <div class="login-container">
             <div class="login-logo">🐷</div>
-            <h1 class="login-title">กระปุกออมสินV2</h1>
+            <h1 class="login-title">กระปุกออมสิน</h1>
             <p class="login-subtitle">บันทึกรายรับรายจ่ายสำหรับครอบครัว</p>
             
             <div class="role-buttons">
@@ -1053,10 +1053,34 @@
                     <span class="role-icon">👦</span>
                     <span>เข้าเป็นลูก</span>
                 </button>
-                <button class="role-btn parent" onclick="login('parent')">
+                <button class="role-btn parent" onclick="showParentLogin()">
                     <span class="role-icon">👨‍👩‍👧</span>
                     <span>เข้าเป็นผู้ปกครอง</span>
                 </button>
+            </div>
+
+            <!-- Parent Password Form -->
+            <div id="parentLoginForm" style="display: none; margin-top: 25px;">
+                <div style="background: #F8F4FF; padding: 20px; border-radius: 15px; border: 2px solid var(--parent-primary);">
+                    <h3 style="margin-bottom: 15px; color: var(--parent-primary);">🔐 ใส่รหัสผ่านผู้ปกครอง</h3>
+                    <input type="password" id="parentPassword" class="form-input" 
+                           placeholder="รหัสผ่าน" 
+                           style="width: 100%; margin-bottom: 15px;"
+                           onkeypress="if(event.key==='Enter') verifyParentPassword()">
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-secondary" onclick="hideParentLogin()" style="flex:1;">
+                            ยกเลิก
+                        </button>
+                        <button class="btn btn-primary" onclick="verifyParentPassword()" 
+                                style="flex:1; background: var(--gradient-parent);">
+                            เข้าสู่ระบบ
+                        </button>
+                    </div>
+                    <p style="font-size: 12px; color: #888; margin-top: 15px; text-align: center;">
+                        💡 รหัสเริ่มต้น: <strong>1234</strong><br>
+                        เปลี่ยนได้ในหน้าผู้ปกครอง
+                    </p>
+                </div>
             </div>
         </div>
     </div>
@@ -1265,6 +1289,9 @@
                 <button class="tab-btn" onclick="switchTab('overview', 'parent')">
                     📈 ภาพรวม
                 </button>
+                <button class="tab-btn" onclick="switchTab('settings', 'parent')">
+                    ⚙️ ตั้งค่า
+                </button>
             </div>
 
             <!-- Allowance Tab -->
@@ -1357,6 +1384,53 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Settings Tab -->
+            <div class="tab-content" id="parentSettingsTab">
+                <div class="section">
+                    <h2 class="section-title">🔐 เปลี่ยนรหัสผ่านผู้ปกครอง</h2>
+                    <div class="form-grid" style="margin-top: 20px;">
+                        <div class="form-group">
+                            <label class="form-label">รหัสผ่านปัจจุบัน</label>
+                            <input type="password" class="form-input" id="currentPassword" 
+                                   placeholder="ใส่รหัสผ่านปัจจุบัน">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">รหัสผ่านใหม่</label>
+                            <input type="password" class="form-input" id="newPassword" 
+                                   placeholder="ใส่รหัสผ่านใหม่">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">ยืนยันรหัสผ่านใหม่</label>
+                            <input type="password" class="form-input" id="confirmPassword" 
+                                   placeholder="ใส่รหัสผ่านใหม่อีกครั้ง">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" style="margin-top: 20px;" onclick="changePassword()">
+                        🔑 เปลี่ยนรหัสผ่าน
+                    </button>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">👶 ตั้งชื่อลูก</h2>
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label class="form-label">ชื่อที่แสดงในแอป</label>
+                        <input type="text" class="form-input" id="childNameInput" 
+                               placeholder="เช่น น้องมิ้นท์">
+                    </div>
+                    <button class="btn btn-primary" style="margin-top: 15px;" onclick="saveChildName()">
+                        💾 บันทึกชื่อ
+                    </button>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">🔄 รีเซ็ตคะแนน</h2>
+                    <p style="color: #666; margin: 15px 0;">รีเซ็ตคะแนนสะสมของลูกเป็น 0 (ใช้เมื่อเริ่มต้นสัปดาห์ใหม่หรือให้โบนัสแล้ว)</p>
+                    <button class="btn btn-danger" onclick="resetPoints()">
+                        🗑️ รีเซ็ตคะแนนเป็น 0
+                    </button>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -1378,6 +1452,11 @@
         let currentRole = null;
         let currentWeek = getCurrentWeek();
         let sheetUrl = localStorage.getItem('sheetUrl') || '';
+        
+        // รหัสผ่านผู้ปกครอง (เก็บใน localStorage)
+        const DEFAULT_PASSWORD = '1234';
+        let parentPassword = localStorage.getItem('parentPassword') || DEFAULT_PASSWORD;
+        let childName = localStorage.getItem('childName') || 'น้องน้ำหวาน';
 
         // Default Data
         let appData = {
@@ -1596,6 +1675,81 @@
         }
 
         // ===== AUTH =====
+        function showParentLogin() {
+            document.getElementById('parentLoginForm').style.display = 'block';
+            document.getElementById('parentPassword').focus();
+        }
+
+        function hideParentLogin() {
+            document.getElementById('parentLoginForm').style.display = 'none';
+            document.getElementById('parentPassword').value = '';
+        }
+
+        function verifyParentPassword() {
+            const inputPassword = document.getElementById('parentPassword').value;
+            
+            if (inputPassword === parentPassword) {
+                hideParentLogin();
+                login('parent');
+            } else {
+                showToast('รหัสผ่านไม่ถูกต้อง', 'error');
+                document.getElementById('parentPassword').value = '';
+                document.getElementById('parentPassword').focus();
+            }
+        }
+
+        function changePassword() {
+            const current = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+
+            if (current !== parentPassword) {
+                showToast('รหัสผ่านปัจจุบันไม่ถูกต้อง', 'error');
+                return;
+            }
+
+            if (newPass.length < 4) {
+                showToast('รหัสผ่านใหม่ต้องมีอย่างน้อย 4 ตัวอักษร', 'error');
+                return;
+            }
+
+            if (newPass !== confirm) {
+                showToast('รหัสผ่านใหม่ไม่ตรงกัน', 'error');
+                return;
+            }
+
+            parentPassword = newPass;
+            localStorage.setItem('parentPassword', newPass);
+            
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            
+            showToast('เปลี่ยนรหัสผ่านสำเร็จ! 🔐', 'success');
+        }
+
+        function saveChildName() {
+            const name = document.getElementById('childNameInput').value.trim();
+            if (!name) {
+                showToast('กรุณาใส่ชื่อ', 'error');
+                return;
+            }
+            
+            childName = name;
+            localStorage.setItem('childName', name);
+            showToast('บันทึกชื่อสำเร็จ!', 'success');
+        }
+
+        function resetPoints() {
+            if (confirm('ต้องการรีเซ็ตคะแนนเป็น 0 ใช่หรือไม่?')) {
+                appData.points = 0;
+                saveData();
+                renderStats();
+                renderRewards();
+                showToast('รีเซ็ตคะแนนเรียบร้อย', 'success');
+            }
+        }
+
         function login(role) {
             currentRole = role;
             document.getElementById('loginScreen').style.display = 'none';
@@ -1603,9 +1757,13 @@
             if (role === 'child') {
                 document.getElementById('childApp').classList.add('active');
                 document.getElementById('childWeekSelect').value = currentWeek;
+                // อัปเดตชื่อลูก
+                document.querySelector('#childApp .header-title').textContent = `สวัสดี ${childName}!`;
             } else {
                 document.getElementById('parentApp').classList.add('active');
                 document.getElementById('parentWeekSelect').value = currentWeek;
+                // โหลดค่าตั้งค่า
+                document.getElementById('childNameInput').value = childName;
                 if (sheetUrl) {
                     document.getElementById('setupSection').style.display = 'none';
                     document.getElementById('sheetUrl').value = sheetUrl;
