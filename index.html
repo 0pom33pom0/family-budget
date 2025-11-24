@@ -1141,6 +1141,9 @@
                 <button class="tab-btn" onclick="switchTab('categories', 'child')">
                     🏷️ หมวดหมู่
                 </button>
+                <button class="tab-btn" onclick="switchTab('settings', 'child')">
+                    ⚙️ ตั้งค่า
+                </button>
             </div>
 
             <!-- Plan Tab -->
@@ -1211,6 +1214,27 @@
                     </div>
                     <div class="category-grid" id="categoryList">
                         <!-- Categories will be rendered here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Child Settings Tab -->
+            <div class="tab-content" id="childSettingsTab">
+                <div class="section">
+                    <h2 class="section-title">📊 เชื่อมต่อ Google Sheets</h2>
+                    <p style="color: #666; margin: 15px 0;">เชื่อมต่อเพื่อให้ข้อมูลซิงค์กับผู้ปกครอง</p>
+                    <input type="text" class="form-input" id="childSheetUrl" 
+                           placeholder="วาง URL ของ Google Sheets ที่นี่..."
+                           style="margin-bottom: 15px;">
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-primary" onclick="connectSheetChild()">
+                            🔗 เชื่อมต่อ
+                        </button>
+                        <button class="btn btn-secondary" onclick="syncNow()">
+                            🔄 ซิงค์ข้อมูล
+                        </button>
+                    </div>
+                    <div id="childConnectionStatus" style="margin-top: 15px; padding: 10px; border-radius: 10px; display: none;">
                     </div>
                 </div>
             </div>
@@ -1654,6 +1678,80 @@
             }
         }
 
+        // เชื่อมต่อ Google Sheets สำหรับลูก
+        async function connectSheetChild() {
+            const url = document.getElementById('childSheetUrl').value.trim();
+            if (!url) {
+                showToast('กรุณาใส่ URL', 'error');
+                return;
+            }
+
+            const statusDiv = document.getElementById('childConnectionStatus');
+            statusDiv.style.display = 'block';
+            statusDiv.style.background = '#FFF9E6';
+            statusDiv.innerHTML = '⏳ กำลังเชื่อมต่อ...';
+
+            try {
+                const testUrl = `${url}?action=getData&week=${encodeURIComponent(currentWeek)}`;
+                const response = await fetch(testUrl);
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                sheetUrl = url;
+                localStorage.setItem('sheetUrl', url);
+                
+                // โหลดข้อมูลจาก Sheet
+                if (data.categories && data.categories.length > 0) {
+                    appData.categories = data.categories;
+                }
+                if (data.budgets) appData.budgets = data.budgets;
+                if (data.expenses) appData.expenses = data.expenses;
+                if (data.allowances) appData.allowances = data.allowances;
+                if (data.missions) appData.missions = data.missions;
+                if (data.rewards && data.rewards.length > 0) {
+                    appData.rewards = data.rewards;
+                }
+                if (typeof data.points === 'number') {
+                    appData.points = data.points;
+                }
+                
+                saveDataLocal();
+                renderAll();
+                
+                statusDiv.style.background = '#E8F8F0';
+                statusDiv.innerHTML = '✅ เชื่อมต่อสำเร็จ! ข้อมูลซิงค์กับผู้ปกครองแล้ว';
+                showToast('เชื่อมต่อสำเร็จ! 🎉', 'success');
+                
+            } catch (error) {
+                console.error('Connection error:', error);
+                statusDiv.style.background = '#FDEDED';
+                statusDiv.innerHTML = '❌ ไม่สามารถเชื่อมต่อได้ กรุณาตรวจสอบ URL';
+                showToast('เชื่อมต่อไม่สำเร็จ', 'error');
+            }
+        }
+
+        // ซิงค์ข้อมูลทันที
+        async function syncNow() {
+            if (!sheetUrl) {
+                showToast('ยังไม่ได้เชื่อมต่อ Google Sheets', 'error');
+                return;
+            }
+            
+            showToast('กำลังซิงค์ข้อมูล...');
+            
+            const success = await loadFromSheet();
+            
+            if (success) {
+                renderAll();
+                showToast('ซิงค์ข้อมูลสำเร็จ! ✅', 'success');
+            } else {
+                showToast('ซิงค์ไม่สำเร็จ กรุณาลองใหม่', 'error');
+            }
+        }
+
         // ===== LOCAL STORAGE =====
         function saveDataLocal() {
             localStorage.setItem('familyBudgetData', JSON.stringify(appData));
@@ -1759,6 +1857,14 @@
                 document.getElementById('childWeekSelect').value = currentWeek;
                 // อัปเดตชื่อลูก
                 document.querySelector('#childApp .header-title').textContent = `สวัสดี ${childName}!`;
+                // แสดง URL ที่เชื่อมต่อไว้
+                if (sheetUrl) {
+                    document.getElementById('childSheetUrl').value = sheetUrl;
+                    const statusDiv = document.getElementById('childConnectionStatus');
+                    statusDiv.style.display = 'block';
+                    statusDiv.style.background = '#E8F8F0';
+                    statusDiv.innerHTML = '✅ เชื่อมต่อแล้ว';
+                }
             } else {
                 document.getElementById('parentApp').classList.add('active');
                 document.getElementById('parentWeekSelect').value = currentWeek;
