@@ -1,0 +1,2335 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>กระปุกออมสิน - บันทึกรายรับรายจ่ายครอบครัว</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF6B35;
+            --primary-light: #FF8F65;
+            --secondary: #4ECDC4;
+            --secondary-light: #7EDDD7;
+            --accent: #FFE66D;
+            --dark: #2C3E50;
+            --light: #F7F9FC;
+            --success: #2ECC71;
+            --danger: #E74C3C;
+            --parent-primary: #6C5CE7;
+            --parent-secondary: #A29BFE;
+            --gradient-warm: linear-gradient(135deg, #FF6B35 0%, #FFE66D 100%);
+            --gradient-cool: linear-gradient(135deg, #4ECDC4 0%, #6C5CE7 100%);
+            --gradient-parent: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%);
+            --shadow-soft: 0 4px 20px rgba(0,0,0,0.08);
+            --shadow-medium: 0 8px 30px rgba(0,0,0,0.12);
+            --shadow-hard: 0 12px 40px rgba(0,0,0,0.18);
+            --radius-sm: 12px;
+            --radius-md: 20px;
+            --radius-lg: 30px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Prompt', 'Kanit', sans-serif;
+            background: var(--light);
+            min-height: 100vh;
+            color: var(--dark);
+            overflow-x: hidden;
+        }
+
+        /* ===== LOGIN SCREEN ===== */
+        .login-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-screen::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            top: -100px;
+            left: -100px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .login-screen::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
+            bottom: -50px;
+            right: -50px;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(30px, 30px) rotate(10deg); }
+        }
+
+        .login-container {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-lg);
+            padding: 50px 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: var(--shadow-hard);
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-logo {
+            font-size: 60px;
+            margin-bottom: 10px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .login-title {
+            font-family: 'Kanit', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            background: var(--gradient-cool);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .login-subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 35px;
+        }
+
+        .role-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .role-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px 30px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: 'Prompt', sans-serif;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .role-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: 0.5s;
+        }
+
+        .role-btn:hover::before {
+            left: 100%;
+        }
+
+        .role-btn.child {
+            background: var(--gradient-warm);
+            color: white;
+            box-shadow: 0 8px 25px rgba(255,107,53,0.35);
+        }
+
+        .role-btn.child:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(255,107,53,0.45);
+        }
+
+        .role-btn.parent {
+            background: var(--gradient-parent);
+            color: white;
+            box-shadow: 0 8px 25px rgba(108,92,231,0.35);
+        }
+
+        .role-btn.parent:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(108,92,231,0.45);
+        }
+
+        .role-icon {
+            font-size: 28px;
+        }
+
+        /* ===== MAIN APP ===== */
+        .app-container {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .app-container.active {
+            display: block;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 15px 20px;
+            box-shadow: var(--shadow-soft);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-logo {
+            font-size: 32px;
+        }
+
+        .header-title {
+            font-family: 'Kanit', sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .header-title.child-mode {
+            background: var(--gradient-warm);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-title.parent-mode {
+            background: var(--gradient-parent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .week-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--light);
+            padding: 8px 15px;
+            border-radius: var(--radius-sm);
+        }
+
+        .week-selector input {
+            border: none;
+            background: transparent;
+            font-family: 'Prompt', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: var(--light);
+            transform: rotate(180deg);
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 25px 20px;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 25px;
+            box-shadow: var(--shadow-soft);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .stat-card.income::before {
+            background: var(--success);
+        }
+
+        .stat-card.budget::before {
+            background: var(--secondary);
+        }
+
+        .stat-card.expense::before {
+            background: var(--danger);
+        }
+
+        .stat-card.points::before {
+            background: var(--accent);
+        }
+
+        .stat-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-family: 'Kanit', sans-serif;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .stat-value.income { color: var(--success); }
+        .stat-value.budget { color: var(--secondary); }
+        .stat-value.expense { color: var(--danger); }
+        .stat-value.points { color: #F39C12; }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: 'Prompt', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            color: #666;
+            white-space: nowrap;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .tab-btn:hover {
+            background: var(--light);
+        }
+
+        .tab-btn.active {
+            background: var(--gradient-warm);
+            color: white;
+            box-shadow: 0 8px 20px rgba(255,107,53,0.3);
+        }
+
+        .parent-mode .tab-btn.active {
+            background: var(--gradient-parent);
+            box-shadow: 0 8px 20px rgba(108,92,231,0.3);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Section */
+        .section {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 25px;
+            box-shadow: var(--shadow-soft);
+            margin-bottom: 25px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-family: 'Kanit', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Forms */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .form-input, .form-select {
+            padding: 12px 16px;
+            border: 2px solid #E8ECF0;
+            border-radius: var(--radius-sm);
+            font-family: 'Prompt', sans-serif;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(255,107,53,0.1);
+        }
+
+        .parent-mode .form-input:focus, 
+        .parent-mode .form-select:focus {
+            border-color: var(--parent-primary);
+            box-shadow: 0 0 0 4px rgba(108,92,231,0.1);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: 'Prompt', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--gradient-warm);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255,107,53,0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255,107,53,0.4);
+        }
+
+        .parent-mode .btn-primary {
+            background: var(--gradient-parent);
+            box-shadow: 0 4px 15px rgba(108,92,231,0.3);
+        }
+
+        .parent-mode .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(108,92,231,0.4);
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .btn-secondary:hover {
+            background: #E8ECF0;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        /* Tables & Lists */
+        .data-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .data-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: var(--light);
+            border-radius: var(--radius-sm);
+            transition: all 0.3s ease;
+        }
+
+        .data-item:hover {
+            background: #E8ECF0;
+            transform: translateX(5px);
+        }
+
+        .data-item-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .data-item-icon {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 20px;
+        }
+
+        .data-item-info h4 {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 3px;
+        }
+
+        .data-item-info p {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .data-item-right {
+            text-align: right;
+        }
+
+        .data-item-amount {
+            font-family: 'Kanit', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .data-item-amount.expense {
+            color: var(--danger);
+        }
+
+        .data-item-amount.budget {
+            color: var(--secondary);
+        }
+
+        .data-item-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .action-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn.edit {
+            background: var(--secondary-light);
+            color: var(--dark);
+        }
+
+        .action-btn.delete {
+            background: #FADBD8;
+            color: var(--danger);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-top: 8px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #E8ECF0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-fill.good {
+            background: var(--success);
+        }
+
+        .progress-fill.warning {
+            background: var(--accent);
+        }
+
+        .progress-fill.danger {
+            background: var(--danger);
+        }
+
+        .progress-text {
+            font-size: 11px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        /* Category Tags */
+        .category-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .category-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--light);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .category-tag:hover {
+            border-color: var(--primary);
+        }
+
+        .category-tag.selected {
+            background: var(--primary);
+            color: white;
+        }
+
+        .category-emoji {
+            font-size: 18px;
+        }
+
+        /* Missions */
+        .mission-card {
+            background: var(--light);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--parent-primary);
+            transition: all 0.3s ease;
+        }
+
+        .mission-card:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .mission-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .mission-title {
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .mission-points {
+            background: var(--accent);
+            color: var(--dark);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .mission-desc {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .mission-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .mission-card.completed {
+            opacity: 0.7;
+            border-left-color: var(--success);
+        }
+
+        .mission-card.completed .mission-title::after {
+            content: '✅';
+            margin-left: 10px;
+        }
+
+        /* Rewards */
+        .rewards-section {
+            background: linear-gradient(135deg, #FFF6E5 0%, #FFF0D6 100%);
+            border-radius: var(--radius-md);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .rewards-title {
+            font-family: 'Kanit', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .reward-tiers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .reward-tier {
+            background: white;
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .reward-tier:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .reward-tier.active {
+            border-color: var(--accent);
+            background: #FFFBF0;
+        }
+
+        .reward-tier.achieved {
+            border-color: var(--success);
+            background: #E8F8F0;
+        }
+
+        .reward-points {
+            font-family: 'Kanit', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #F39C12;
+            margin-bottom: 5px;
+        }
+
+        .reward-label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .reward-bonus {
+            font-weight: 600;
+            color: var(--success);
+            font-size: 16px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-title {
+            font-family: 'Kanit', sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #888;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--dark);
+        }
+
+        .modal-body {
+            margin-bottom: 25px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #888;
+        }
+
+        .empty-state-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+        }
+
+        /* Google Sheets Setup */
+        .setup-section {
+            background: linear-gradient(135deg, #E8F4FD 0%, #F0F7FF 100%);
+            border-radius: var(--radius-md);
+            padding: 30px;
+            margin-bottom: 25px;
+            border: 2px dashed #4A90D9;
+        }
+
+        .setup-title {
+            font-family: 'Kanit', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2563EB;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .setup-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #CBD5E1;
+            border-radius: var(--radius-sm);
+            font-family: 'Prompt', sans-serif;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .setup-note {
+            font-size: 13px;
+            color: #64748B;
+            line-height: 1.6;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--dark);
+            color: white;
+            padding: 15px 25px;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-hard);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+
+        .toast.error {
+            background: var(--danger);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 40px 25px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .tabs {
+                flex-wrap: nowrap;
+            }
+
+            .tab-btn {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .data-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .data-item-right {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-container">
+            <div class="login-logo">🐷</div>
+            <h1 class="login-title">กระปุกออมสิน</h1>
+            <p class="login-subtitle">บันทึกรายรับรายจ่ายสำหรับครอบครัว</p>
+            
+            <div class="role-buttons">
+                <button class="role-btn child" onclick="login('child')">
+                    <span class="role-icon">👦</span>
+                    <span>เข้าเป็นลูก</span>
+                </button>
+                <button class="role-btn parent" onclick="login('parent')">
+                    <span class="role-icon">👨‍👩‍👧</span>
+                    <span>เข้าเป็นผู้ปกครอง</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Child App -->
+    <div class="app-container" id="childApp">
+        <header class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <span class="header-logo">🐷</span>
+                    <span class="header-title child-mode">สวัสดี น้องน้ำหวาน!</span>
+                </div>
+                <div class="header-right">
+                    <div class="week-selector">
+                        📅 <input type="week" id="childWeekSelect" onchange="changeWeek()">
+                    </div>
+                    <button class="logout-btn" onclick="logout()" title="ออกจากระบบ">🚪</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card income">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-label">รายรับสัปดาห์นี้</div>
+                    <div class="stat-value income" id="childIncome">฿0</div>
+                </div>
+                <div class="stat-card budget">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-label">วางแผนไว้</div>
+                    <div class="stat-value budget" id="childBudget">฿0</div>
+                </div>
+                <div class="stat-card expense">
+                    <div class="stat-icon">🛒</div>
+                    <div class="stat-label">ใช้ไปแล้ว</div>
+                    <div class="stat-value expense" id="childExpense">฿0</div>
+                </div>
+                <div class="stat-card points">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-label">คะแนนสะสม</div>
+                    <div class="stat-value points" id="childPoints">0</div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('plan', 'child')">
+                    📝 วางแผนการใช้เงิน
+                </button>
+                <button class="tab-btn" onclick="switchTab('record', 'child')">
+                    📒 บันทึกรายจ่าย
+                </button>
+                <button class="tab-btn" onclick="switchTab('missions', 'child')">
+                    🎯 ภารกิจ
+                </button>
+                <button class="tab-btn" onclick="switchTab('categories', 'child')">
+                    🏷️ หมวดหมู่
+                </button>
+            </div>
+
+            <!-- Plan Tab -->
+            <div class="tab-content active" id="childPlanTab">
+                <div class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">📝 วางแผนงบประมาณ</h2>
+                        <button class="btn btn-primary btn-sm" onclick="openModal('addBudget')">
+                            ➕ เพิ่มแผน
+                        </button>
+                    </div>
+                    <div class="data-list" id="budgetList">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <p class="empty-state-text">ยังไม่มีแผนการใช้เงิน<br>เริ่มวางแผนกันเลย!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Record Tab -->
+            <div class="tab-content" id="childRecordTab">
+                <div class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">📒 บันทึกรายจ่ายวันนี้</h2>
+                        <button class="btn btn-primary btn-sm" onclick="openModal('addExpense')">
+                            ➕ เพิ่มรายจ่าย
+                        </button>
+                    </div>
+                    <div class="data-list" id="expenseList">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🧾</div>
+                            <p class="empty-state-text">ยังไม่มีรายจ่าย<br>บันทึกรายจ่ายของวันนี้กันเถอะ!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Missions Tab -->
+            <div class="tab-content" id="childMissionsTab">
+                <!-- Rewards -->
+                <div class="rewards-section">
+                    <h2 class="rewards-title">🏆 โบนัสตามคะแนน</h2>
+                    <div class="reward-tiers" id="rewardTiers">
+                        <!-- Rewards will be rendered here -->
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">🎯 ภารกิจของฉัน</h2>
+                    <div id="missionsList">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🎮</div>
+                            <p class="empty-state-text">ยังไม่มีภารกิจ<br>รอผู้ปกครองมอบหมายนะ!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories Tab -->
+            <div class="tab-content" id="childCategoriesTab">
+                <div class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">🏷️ หมวดหมู่ค่าใช้จ่าย</h2>
+                        <button class="btn btn-primary btn-sm" onclick="openModal('addCategory')">
+                            ➕ เพิ่มหมวดหมู่
+                        </button>
+                    </div>
+                    <div class="category-grid" id="categoryList">
+                        <!-- Categories will be rendered here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Parent App -->
+    <div class="app-container parent-mode" id="parentApp">
+        <header class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <span class="header-logo">🐷</span>
+                    <span class="header-title parent-mode">แผงควบคุมผู้ปกครอง</span>
+                </div>
+                <div class="header-right">
+                    <div class="week-selector">
+                        📅 <input type="week" id="parentWeekSelect" onchange="changeWeek()">
+                    </div>
+                    <button class="logout-btn" onclick="logout()" title="ออกจากระบบ">🚪</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Google Sheets Setup -->
+            <div class="setup-section" id="setupSection">
+                <h2 class="setup-title">📊 เชื่อมต่อ Google Sheets</h2>
+                <input type="text" class="setup-input" id="sheetUrl" 
+                       placeholder="วาง URL ของ Google Sheets (Web App URL) ที่นี่...">
+                <button class="btn btn-primary" onclick="connectSheet()">🔗 เชื่อมต่อ</button>
+                <p class="setup-note">
+                    <strong>วิธีตั้งค่า:</strong><br>
+                    1. สร้าง Google Sheets ใหม่<br>
+                    2. ไปที่ Extensions > Apps Script<br>
+                    3. คัดลอกโค้ดจากไฟล์ที่ให้มา<br>
+                    4. Deploy > New deployment > Web app<br>
+                    5. คัดลอก URL มาวางที่นี่
+                </p>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card income">
+                    <div class="stat-icon">💵</div>
+                    <div class="stat-label">เงินที่ให้สัปดาห์นี้</div>
+                    <div class="stat-value income" id="parentIncome">฿0</div>
+                </div>
+                <div class="stat-card budget">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-label">ลูกวางแผนไว้</div>
+                    <div class="stat-value budget" id="parentBudget">฿0</div>
+                </div>
+                <div class="stat-card expense">
+                    <div class="stat-icon">🧾</div>
+                    <div class="stat-label">ลูกใช้ไปแล้ว</div>
+                    <div class="stat-value expense" id="parentExpense">฿0</div>
+                </div>
+                <div class="stat-card points">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-label">คะแนนลูกสะสม</div>
+                    <div class="stat-value points" id="parentPoints">0</div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('allowance', 'parent')">
+                    💰 ให้เงินลูก
+                </button>
+                <button class="tab-btn" onclick="switchTab('missions', 'parent')">
+                    🎯 มอบหมายภารกิจ
+                </button>
+                <button class="tab-btn" onclick="switchTab('rewards', 'parent')">
+                    🎁 ตั้งค่าโบนัส
+                </button>
+                <button class="tab-btn" onclick="switchTab('overview', 'parent')">
+                    📈 ภาพรวม
+                </button>
+            </div>
+
+            <!-- Allowance Tab -->
+            <div class="tab-content active" id="parentAllowanceTab">
+                <div class="section">
+                    <h2 class="section-title">💰 ให้เงินลูกประจำสัปดาห์</h2>
+                    <div class="form-grid" style="margin-top: 20px;">
+                        <div class="form-group">
+                            <label class="form-label">จำนวนเงิน (บาท)</label>
+                            <input type="number" class="form-input" id="allowanceAmount" 
+                                   placeholder="เช่น 500">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">หมายเหตุ</label>
+                            <input type="text" class="form-input" id="allowanceNote" 
+                                   placeholder="เช่น ค่าขนมประจำสัปดาห์">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" style="margin-top: 20px;" onclick="giveAllowance()">
+                        💸 ให้เงิน
+                    </button>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">📜 ประวัติการให้เงิน</h2>
+                    <div class="data-list" id="allowanceHistory">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📝</div>
+                            <p class="empty-state-text">ยังไม่มีประวัติการให้เงิน</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Missions Tab -->
+            <div class="tab-content" id="parentMissionsTab">
+                <div class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">🎯 จัดการภารกิจ</h2>
+                        <button class="btn btn-primary btn-sm" onclick="openModal('addMission')">
+                            ➕ เพิ่มภารกิจ
+                        </button>
+                    </div>
+                    <div id="parentMissionsList">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <p class="empty-state-text">ยังไม่มีภารกิจ<br>สร้างภารกิจให้ลูกทำกันเถอะ!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rewards Tab -->
+            <div class="tab-content" id="parentRewardsTab">
+                <div class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">🎁 ตั้งค่าโบนัสตามคะแนน</h2>
+                        <button class="btn btn-primary btn-sm" onclick="openModal('addReward')">
+                            ➕ เพิ่มระดับโบนัส
+                        </button>
+                    </div>
+                    <div class="data-list" id="rewardSettings">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🏆</div>
+                            <p class="empty-state-text">ยังไม่มีการตั้งค่าโบนัส</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overview Tab -->
+            <div class="tab-content" id="parentOverviewTab">
+                <div class="section">
+                    <h2 class="section-title">📊 แผนงบประมาณของลูก</h2>
+                    <div class="data-list" id="parentBudgetView">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <p class="empty-state-text">ลูกยังไม่ได้วางแผนงบประมาณ</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2 class="section-title">🧾 รายจ่ายของลูก</h2>
+                    <div class="data-list" id="parentExpenseView">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📝</div>
+                            <p class="empty-state-text">ลูกยังไม่มีรายจ่ายในสัปดาห์นี้</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="modalContent">
+            <!-- Modal content will be dynamically inserted -->
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <span id="toastIcon">✓</span>
+        <span id="toastMessage">สำเร็จ!</span>
+    </div>
+
+    <script>
+        // ===== APP STATE =====
+        let currentRole = null;
+        let currentWeek = getCurrentWeek();
+        let sheetUrl = localStorage.getItem('sheetUrl') || '';
+
+        // Default Data
+        let appData = {
+            categories: [
+                { id: 1, name: 'อาหาร', emoji: '🍱' },
+                { id: 2, name: 'เดินทาง', emoji: '🚌' },
+                { id: 3, name: 'ขนม', emoji: '🍫' },
+                { id: 4, name: 'เครื่องเขียน', emoji: '✏️' },
+                { id: 5, name: 'เกม', emoji: '🎮' },
+                { id: 6, name: 'อื่นๆ', emoji: '📦' }
+            ],
+            budgets: [],
+            expenses: [],
+            missions: [],
+            rewards: [
+                { id: 1, points: 50, bonus: 20 },
+                { id: 2, points: 100, bonus: 50 },
+                { id: 3, points: 150, bonus: 100 }
+            ],
+            allowances: [],
+            points: 0
+        };
+
+        // ===== UTILITIES =====
+        function getCurrentWeek() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const firstDay = new Date(year, 0, 1);
+            const days = Math.floor((now - firstDay) / (24 * 60 * 60 * 1000));
+            const week = Math.ceil((days + firstDay.getDay() + 1) / 7);
+            return `${year}-W${String(week).padStart(2, '0')}`;
+        }
+
+        function formatMoney(amount) {
+            return `฿${Number(amount).toLocaleString()}`;
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toastIcon');
+            const msg = document.getElementById('toastMessage');
+            
+            icon.textContent = type === 'success' ? '✓' : '✗';
+            msg.textContent = message;
+            toast.className = `toast show ${type}`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function generateId() {
+            return Date.now() + Math.random().toString(36).substr(2, 9);
+        }
+
+        // ===== GOOGLE SHEETS INTEGRATION =====
+        async function syncWithSheet(action, data) {
+            if (!sheetUrl) {
+                console.log('No sheet URL configured, using local storage');
+                return null;
+            }
+
+            try {
+                const response = await fetch(sheetUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ action, data, week: currentWeek })
+                });
+                return true;
+            } catch (error) {
+                console.error('Sheet sync error:', error);
+                return null;
+            }
+        }
+
+        async function loadFromSheet() {
+            if (!sheetUrl) return;
+            
+            try {
+                const response = await fetch(`${sheetUrl}?action=getData&week=${currentWeek}`);
+                const data = await response.json();
+                if (data) {
+                    Object.assign(appData, data);
+                }
+            } catch (error) {
+                console.error('Load from sheet error:', error);
+            }
+        }
+
+        function connectSheet() {
+            const url = document.getElementById('sheetUrl').value.trim();
+            if (url) {
+                sheetUrl = url;
+                localStorage.setItem('sheetUrl', url);
+                showToast('เชื่อมต่อ Google Sheets สำเร็จ!');
+                document.getElementById('setupSection').style.display = 'none';
+            } else {
+                showToast('กรุณาใส่ URL', 'error');
+            }
+        }
+
+        // ===== LOCAL STORAGE =====
+        function saveData() {
+            localStorage.setItem('familyBudgetData', JSON.stringify(appData));
+            syncWithSheet('saveData', appData);
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('familyBudgetData');
+            if (saved) {
+                appData = JSON.parse(saved);
+            }
+        }
+
+        // ===== AUTH =====
+        function login(role) {
+            currentRole = role;
+            document.getElementById('loginScreen').style.display = 'none';
+            
+            if (role === 'child') {
+                document.getElementById('childApp').classList.add('active');
+                document.getElementById('childWeekSelect').value = currentWeek;
+            } else {
+                document.getElementById('parentApp').classList.add('active');
+                document.getElementById('parentWeekSelect').value = currentWeek;
+                if (sheetUrl) {
+                    document.getElementById('setupSection').style.display = 'none';
+                    document.getElementById('sheetUrl').value = sheetUrl;
+                }
+            }
+            
+            loadData();
+            renderAll();
+        }
+
+        function logout() {
+            currentRole = null;
+            document.getElementById('childApp').classList.remove('active');
+            document.getElementById('parentApp').classList.remove('active');
+            document.getElementById('loginScreen').style.display = 'flex';
+        }
+
+        // ===== TAB SWITCHING =====
+        function switchTab(tabName, role) {
+            const prefix = role === 'child' ? 'child' : 'parent';
+            
+            // Update buttons
+            document.querySelectorAll(`#${prefix}App .tab-btn`).forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.closest('.tab-btn').classList.add('active');
+            
+            // Update content
+            document.querySelectorAll(`#${prefix}App .tab-content`).forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            const tabId = `${prefix}${tabName.charAt(0).toUpperCase() + tabName.slice(1)}Tab`;
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function changeWeek() {
+            const weekInput = currentRole === 'child' ? 
+                document.getElementById('childWeekSelect') : 
+                document.getElementById('parentWeekSelect');
+            currentWeek = weekInput.value;
+            renderAll();
+        }
+
+        // ===== MODALS =====
+        function openModal(type, data = null) {
+            const overlay = document.getElementById('modalOverlay');
+            const modal = document.getElementById('modalContent');
+            
+            let html = '';
+            
+            switch(type) {
+                case 'addCategory':
+                    html = `
+                        <div class="modal-header">
+                            <h2 class="modal-title">🏷️ เพิ่มหมวดหมู่ใหม่</h2>
+                            <button class="modal-close" onclick="closeModal()">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="form-label">อีโมจิ</label>
+                                <input type="text" class="form-input" id="categoryEmoji" 
+                                       placeholder="เช่น 🎒" maxlength="2">
+                            </div>
+                            <div class="form-group" style="margin-top:15px;">
+                                <label class="form-label">ชื่อหมวดหมู่</label>
+                                <input type="text" class="form-input" id="categoryName" 
+                                       placeholder="เช่น ค่าหนังสือ">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
+                            <button class="btn btn-primary" onclick="addCategory()">เพิ่ม</button>
+                        </div>
+                    `;
+                    break;
+
+                case 'addBudget':
+                    const categoryOptions = appData.categories.map(c => 
+                        `<option value="${c.id}">${c.emoji} ${c.name}</option>`
+                    ).join('');
+                    html = `
+                        <div class="modal-header">
+                            <h2 class="modal-title">📝 วางแผนงบประมาณ</h2>
+                            <button class="modal-close" onclick="closeModal()">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="form-label">หมวดหมู่</label>
+                                <select class="form-select" id="budgetCategory">
+                                    ${categoryOptions}
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-top:15px;">
+                                <label class="form-label">จำนวนเงิน (บาท)</label>
+                                <input type="number" class="form-input" id="budgetAmount" 
+                                       placeholder="เช่น 350">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
+                            <button class="btn btn-primary" onclick="addBudget()">เพิ่ม</button>
+                        </div>
+                    `;
+                    break;
+
+                case 'addExpense':
+                    const expCategoryOptions = appData.categories.map(c => 
+                        `<option value="${c.id}">${c.emoji} ${c.name}</option>`
+                    ).join('');
+                    html = `
+                        <div class="modal-header">
+                            <h2 class="modal-title">📒 บันทึกรายจ่าย</h2>
+                            <button class="modal-close" onclick="closeModal()">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="form-label">หมวดหมู่</label>
+                                <select class="form-select" id="expenseCategory">
+                                    ${expCategoryOptions}
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-top:15px;">
+                                <label class="form-label">รายละเอียด</label>
+                                <input type="text" class="form-input" id="expenseDesc" 
+                                       placeholder="เช่น ข้าวผัดกระเพรา">
+                            </div>
+                            <div class="form-group" style="margin-top:15px;">
+                                <label class="form-label">จำนวนเงิน (บาท)</label>
+                                <input type="number" class="form-input" id="expenseAmount" 
+                                       placeholder="เช่น 50">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
+                            <button class="btn btn-primary" onclick="addExpense()">บันทึก</button>
+                        </div>
+                    `;
+                    break;
+
+                case 'addMission':
+                    html = `
+                        <div class="modal-header">
+                            <h2 class="modal-title">🎯 สร้างภารกิจใหม่</h2>
+                            <button class="modal-close" onclick="closeModal()">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="form-label">ชื่อภารกิจ</label>
+                                <input type="text" class="form-input" id="missionTitle" 
+                                       placeholder="เช่น ล้างจาน">
+                            </div>
+                            <div class="form-group" style="margin-top:15px;">
+                                <label class="form-label">รายละเอียด</label>
+                                <input type="text" class="form-input" id="missionDesc" 
+                                       placeholder="เช่น ล้างจานหลังกินข้าวเย็น">
+                            </div>
+                            <div class="form-group" style="margin-top:15px;">
+                                <label class="form-label">คะแนนที่ได้รับ</label>
+                                <input type="number" class="form-input" id="missionPoints" 
+                                       placeholder="เช่น 10">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
+                            <button class="btn btn-primary" onclick="addMission()">สร้าง</button>
+                        </div>
+                    `;
+                    break;
+
+                case 'addReward':
+                    html = `
+                        <div class="modal-header">
+                            <h2 class="modal-title">🎁 เพิ่มระดับโบนัส</h2>
+                            <button class="modal-close" onclick="closeModal()">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label class="form-label">คะแนนที่ต้องการ</label>
+                                <input type="number" class="form-input" id="rewardPoints" 
+                                       placeholder="เช่น 100">
+                            </div>
+                            <div class="form-group" style="margin-top:15px;">
+                                <label class="form-label">โบนัสเงิน (บาท)</label>
+                                <input type="number" class="form-input" id="rewardBonus" 
+                                       placeholder="เช่น 50">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" onclick="closeModal()">ยกเลิก</button>
+                            <button class="btn btn-primary" onclick="addReward()">เพิ่ม</button>
+                        </div>
+                    `;
+                    break;
+            }
+            
+            modal.innerHTML = html;
+            overlay.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        // ===== DATA OPERATIONS =====
+        function addCategory() {
+            const emoji = document.getElementById('categoryEmoji').value || '📌';
+            const name = document.getElementById('categoryName').value.trim();
+            
+            if (!name) {
+                showToast('กรุณาใส่ชื่อหมวดหมู่', 'error');
+                return;
+            }
+            
+            appData.categories.push({
+                id: generateId(),
+                name,
+                emoji
+            });
+            
+            saveData();
+            renderCategories();
+            closeModal();
+            showToast('เพิ่มหมวดหมู่สำเร็จ!');
+        }
+
+        function deleteCategory(id) {
+            appData.categories = appData.categories.filter(c => c.id !== id);
+            saveData();
+            renderCategories();
+            showToast('ลบหมวดหมู่แล้ว');
+        }
+
+        function addBudget() {
+            const categoryId = document.getElementById('budgetCategory').value;
+            const amount = parseFloat(document.getElementById('budgetAmount').value);
+            
+            if (!amount || amount <= 0) {
+                showToast('กรุณาใส่จำนวนเงิน', 'error');
+                return;
+            }
+            
+            const category = appData.categories.find(c => c.id == categoryId);
+            
+            // Check if budget for this category already exists
+            const existing = appData.budgets.find(b => b.categoryId == categoryId && b.week === currentWeek);
+            if (existing) {
+                existing.amount = amount;
+            } else {
+                appData.budgets.push({
+                    id: generateId(),
+                    categoryId,
+                    categoryName: category.name,
+                    categoryEmoji: category.emoji,
+                    amount,
+                    week: currentWeek
+                });
+            }
+            
+            saveData();
+            renderBudgets();
+            renderStats();
+            closeModal();
+            showToast('บันทึกแผนงบประมาณสำเร็จ!');
+        }
+
+        function deleteBudget(id) {
+            appData.budgets = appData.budgets.filter(b => b.id !== id);
+            saveData();
+            renderBudgets();
+            renderStats();
+            showToast('ลบแผนงบประมาณแล้ว');
+        }
+
+        function addExpense() {
+            const categoryId = document.getElementById('expenseCategory').value;
+            const desc = document.getElementById('expenseDesc').value.trim();
+            const amount = parseFloat(document.getElementById('expenseAmount').value);
+            
+            if (!desc) {
+                showToast('กรุณาใส่รายละเอียด', 'error');
+                return;
+            }
+            
+            if (!amount || amount <= 0) {
+                showToast('กรุณาใส่จำนวนเงิน', 'error');
+                return;
+            }
+            
+            const category = appData.categories.find(c => c.id == categoryId);
+            
+            appData.expenses.push({
+                id: generateId(),
+                categoryId,
+                categoryName: category.name,
+                categoryEmoji: category.emoji,
+                description: desc,
+                amount,
+                date: new Date().toISOString(),
+                week: currentWeek
+            });
+            
+            saveData();
+            renderExpenses();
+            renderStats();
+            closeModal();
+            showToast('บันทึกรายจ่ายสำเร็จ!');
+        }
+
+        function deleteExpense(id) {
+            appData.expenses = appData.expenses.filter(e => e.id !== id);
+            saveData();
+            renderExpenses();
+            renderStats();
+            showToast('ลบรายจ่ายแล้ว');
+        }
+
+        function giveAllowance() {
+            const amount = parseFloat(document.getElementById('allowanceAmount').value);
+            const note = document.getElementById('allowanceNote').value.trim() || 'ค่าขนมประจำสัปดาห์';
+            
+            if (!amount || amount <= 0) {
+                showToast('กรุณาใส่จำนวนเงิน', 'error');
+                return;
+            }
+            
+            appData.allowances.push({
+                id: generateId(),
+                amount,
+                note,
+                date: new Date().toISOString(),
+                week: currentWeek
+            });
+            
+            document.getElementById('allowanceAmount').value = '';
+            document.getElementById('allowanceNote').value = '';
+            
+            saveData();
+            renderAllowances();
+            renderStats();
+            showToast(`ให้เงินลูก ${formatMoney(amount)} สำเร็จ!`);
+        }
+
+        function addMission() {
+            const title = document.getElementById('missionTitle').value.trim();
+            const desc = document.getElementById('missionDesc').value.trim();
+            const points = parseInt(document.getElementById('missionPoints').value);
+            
+            if (!title) {
+                showToast('กรุณาใส่ชื่อภารกิจ', 'error');
+                return;
+            }
+            
+            if (!points || points <= 0) {
+                showToast('กรุณาใส่คะแนน', 'error');
+                return;
+            }
+            
+            appData.missions.push({
+                id: generateId(),
+                title,
+                description: desc,
+                points,
+                completed: false,
+                week: currentWeek
+            });
+            
+            saveData();
+            renderMissions();
+            closeModal();
+            showToast('สร้างภารกิจสำเร็จ!');
+        }
+
+        function completeMission(id) {
+            const mission = appData.missions.find(m => m.id === id);
+            if (mission && !mission.completed) {
+                mission.completed = true;
+                appData.points += mission.points;
+                saveData();
+                renderMissions();
+                renderStats();
+                renderRewards();
+                showToast(`ได้รับ ${mission.points} คะแนน! 🎉`);
+            }
+        }
+
+        function deleteMission(id) {
+            appData.missions = appData.missions.filter(m => m.id !== id);
+            saveData();
+            renderMissions();
+            showToast('ลบภารกิจแล้ว');
+        }
+
+        function addReward() {
+            const points = parseInt(document.getElementById('rewardPoints').value);
+            const bonus = parseInt(document.getElementById('rewardBonus').value);
+            
+            if (!points || points <= 0) {
+                showToast('กรุณาใส่คะแนน', 'error');
+                return;
+            }
+            
+            if (!bonus || bonus <= 0) {
+                showToast('กรุณาใส่โบนัส', 'error');
+                return;
+            }
+            
+            appData.rewards.push({
+                id: generateId(),
+                points,
+                bonus
+            });
+            
+            appData.rewards.sort((a, b) => a.points - b.points);
+            
+            saveData();
+            renderRewardSettings();
+            renderRewards();
+            closeModal();
+            showToast('เพิ่มระดับโบนัสสำเร็จ!');
+        }
+
+        function deleteReward(id) {
+            appData.rewards = appData.rewards.filter(r => r.id !== id);
+            saveData();
+            renderRewardSettings();
+            renderRewards();
+            showToast('ลบระดับโบนัสแล้ว');
+        }
+
+        // ===== RENDERING =====
+        function renderAll() {
+            renderStats();
+            renderCategories();
+            renderBudgets();
+            renderExpenses();
+            renderMissions();
+            renderRewards();
+            renderRewardSettings();
+            renderAllowances();
+            renderParentOverview();
+        }
+
+        function renderStats() {
+            const weekAllowances = appData.allowances.filter(a => a.week === currentWeek);
+            const weekBudgets = appData.budgets.filter(b => b.week === currentWeek);
+            const weekExpenses = appData.expenses.filter(e => e.week === currentWeek);
+            
+            const totalIncome = weekAllowances.reduce((sum, a) => sum + a.amount, 0);
+            const totalBudget = weekBudgets.reduce((sum, b) => sum + b.amount, 0);
+            const totalExpense = weekExpenses.reduce((sum, e) => sum + e.amount, 0);
+            
+            // Child stats
+            document.getElementById('childIncome').textContent = formatMoney(totalIncome);
+            document.getElementById('childBudget').textContent = formatMoney(totalBudget);
+            document.getElementById('childExpense').textContent = formatMoney(totalExpense);
+            document.getElementById('childPoints').textContent = appData.points;
+            
+            // Parent stats
+            document.getElementById('parentIncome').textContent = formatMoney(totalIncome);
+            document.getElementById('parentBudget').textContent = formatMoney(totalBudget);
+            document.getElementById('parentExpense').textContent = formatMoney(totalExpense);
+            document.getElementById('parentPoints').textContent = appData.points;
+        }
+
+        function renderCategories() {
+            const container = document.getElementById('categoryList');
+            
+            if (appData.categories.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🏷️</div>
+                        <p class="empty-state-text">ยังไม่มีหมวดหมู่</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = appData.categories.map(cat => `
+                <div class="category-tag">
+                    <span class="category-emoji">${cat.emoji}</span>
+                    <span>${cat.name}</span>
+                    <button class="action-btn delete" onclick="deleteCategory('${cat.id}')" 
+                            style="margin-left: 5px; padding: 2px 6px;">×</button>
+                </div>
+            `).join('');
+        }
+
+        function renderBudgets() {
+            const container = document.getElementById('budgetList');
+            const weekBudgets = appData.budgets.filter(b => b.week === currentWeek);
+            
+            if (weekBudgets.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <p class="empty-state-text">ยังไม่มีแผนการใช้เงิน<br>เริ่มวางแผนกันเลย!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = weekBudgets.map(budget => {
+                const expenses = appData.expenses.filter(e => 
+                    e.categoryId == budget.categoryId && e.week === currentWeek
+                );
+                const spent = expenses.reduce((sum, e) => sum + e.amount, 0);
+                const percent = Math.min((spent / budget.amount) * 100, 100);
+                const progressClass = percent > 90 ? 'danger' : percent > 70 ? 'warning' : 'good';
+                
+                return `
+                    <div class="data-item">
+                        <div class="data-item-left">
+                            <div class="data-item-icon" style="background: ${getRandomColor()}20; color: ${getRandomColor()};">
+                                ${budget.categoryEmoji}
+                            </div>
+                            <div class="data-item-info">
+                                <h4>${budget.categoryName}</h4>
+                                <div class="progress-container">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill ${progressClass}" style="width: ${percent}%"></div>
+                                    </div>
+                                    <div class="progress-text">ใช้ไป ${formatMoney(spent)} / ${formatMoney(budget.amount)}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="data-item-right">
+                            <div class="data-item-amount budget">${formatMoney(budget.amount)}</div>
+                            <div class="data-item-actions">
+                                <button class="action-btn delete" onclick="deleteBudget('${budget.id}')">ลบ</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderExpenses() {
+            const container = document.getElementById('expenseList');
+            const weekExpenses = appData.expenses.filter(e => e.week === currentWeek);
+            
+            if (weekExpenses.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🧾</div>
+                        <p class="empty-state-text">ยังไม่มีรายจ่าย<br>บันทึกรายจ่ายของวันนี้กันเถอะ!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = weekExpenses.map(expense => {
+                const date = new Date(expense.date);
+                const dateStr = date.toLocaleDateString('th-TH', { 
+                    weekday: 'short', 
+                    day: 'numeric', 
+                    month: 'short' 
+                });
+                
+                return `
+                    <div class="data-item">
+                        <div class="data-item-left">
+                            <div class="data-item-icon" style="background: #FADBD820;">
+                                ${expense.categoryEmoji}
+                            </div>
+                            <div class="data-item-info">
+                                <h4>${expense.description}</h4>
+                                <p>${expense.categoryName} • ${dateStr}</p>
+                            </div>
+                        </div>
+                        <div class="data-item-right">
+                            <div class="data-item-amount expense">-${formatMoney(expense.amount)}</div>
+                            <div class="data-item-actions">
+                                <button class="action-btn delete" onclick="deleteExpense('${expense.id}')">ลบ</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderMissions() {
+            const childContainer = document.getElementById('missionsList');
+            const parentContainer = document.getElementById('parentMissionsList');
+            const weekMissions = appData.missions.filter(m => m.week === currentWeek);
+            
+            if (weekMissions.length === 0) {
+                const emptyHtml = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🎮</div>
+                        <p class="empty-state-text">ยังไม่มีภารกิจ</p>
+                    </div>
+                `;
+                childContainer.innerHTML = emptyHtml;
+                parentContainer.innerHTML = emptyHtml;
+                return;
+            }
+            
+            const childHtml = weekMissions.map(mission => `
+                <div class="mission-card ${mission.completed ? 'completed' : ''}">
+                    <div class="mission-header">
+                        <div class="mission-title">🎯 ${mission.title}</div>
+                        <div class="mission-points">⭐ ${mission.points} คะแนน</div>
+                    </div>
+                    <p class="mission-desc">${mission.description || 'ไม่มีรายละเอียด'}</p>
+                    <div class="mission-actions">
+                        ${!mission.completed ? 
+                            `<button class="btn btn-success btn-sm" onclick="completeMission('${mission.id}')">
+                                ✅ ทำเสร็จแล้ว
+                            </button>` : 
+                            '<span style="color: var(--success);">✓ ทำสำเร็จแล้ว</span>'
+                        }
+                    </div>
+                </div>
+            `).join('');
+            
+            const parentHtml = weekMissions.map(mission => `
+                <div class="mission-card ${mission.completed ? 'completed' : ''}">
+                    <div class="mission-header">
+                        <div class="mission-title">🎯 ${mission.title}</div>
+                        <div class="mission-points">⭐ ${mission.points} คะแนน</div>
+                    </div>
+                    <p class="mission-desc">${mission.description || 'ไม่มีรายละเอียด'}</p>
+                    <div class="mission-actions">
+                        <span style="color: ${mission.completed ? 'var(--success)' : '#888'};">
+                            ${mission.completed ? '✓ ลูกทำสำเร็จแล้ว' : '⏳ รอลูกทำ'}
+                        </span>
+                        <button class="btn btn-danger btn-sm" onclick="deleteMission('${mission.id}')" 
+                                style="margin-left: auto;">ลบ</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            childContainer.innerHTML = childHtml;
+            parentContainer.innerHTML = parentHtml;
+        }
+
+        function renderRewards() {
+            const container = document.getElementById('rewardTiers');
+            
+            if (appData.rewards.length === 0) {
+                container.innerHTML = '<p style="color:#888;">ยังไม่มีการตั้งค่าโบนัส</p>';
+                return;
+            }
+            
+            container.innerHTML = appData.rewards.map(reward => {
+                const achieved = appData.points >= reward.points;
+                return `
+                    <div class="reward-tier ${achieved ? 'achieved' : ''}">
+                        <div class="reward-points">${reward.points}</div>
+                        <div class="reward-label">คะแนน</div>
+                        <div class="reward-bonus">+${formatMoney(reward.bonus)}</div>
+                        ${achieved ? '<div style="color: var(--success); font-size: 20px; margin-top: 5px;">✓</div>' : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderRewardSettings() {
+            const container = document.getElementById('rewardSettings');
+            
+            if (appData.rewards.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🏆</div>
+                        <p class="empty-state-text">ยังไม่มีการตั้งค่าโบนัส</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = appData.rewards.map(reward => `
+                <div class="data-item">
+                    <div class="data-item-left">
+                        <div class="data-item-icon" style="background: #FFF6E5;">🏆</div>
+                        <div class="data-item-info">
+                            <h4>${reward.points} คะแนน</h4>
+                            <p>รับโบนัส ${formatMoney(reward.bonus)}</p>
+                        </div>
+                    </div>
+                    <div class="data-item-right">
+                        <button class="action-btn delete" onclick="deleteReward('${reward.id}')">ลบ</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderAllowances() {
+            const container = document.getElementById('allowanceHistory');
+            const weekAllowances = appData.allowances.filter(a => a.week === currentWeek);
+            
+            if (weekAllowances.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <p class="empty-state-text">ยังไม่มีประวัติการให้เงิน</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = weekAllowances.map(allowance => {
+                const date = new Date(allowance.date);
+                const dateStr = date.toLocaleDateString('th-TH', { 
+                    weekday: 'short', 
+                    day: 'numeric', 
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                return `
+                    <div class="data-item">
+                        <div class="data-item-left">
+                            <div class="data-item-icon" style="background: #E8F8F020;">💵</div>
+                            <div class="data-item-info">
+                                <h4>${allowance.note}</h4>
+                                <p>${dateStr}</p>
+                            </div>
+                        </div>
+                        <div class="data-item-right">
+                            <div class="data-item-amount" style="color: var(--success);">+${formatMoney(allowance.amount)}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderParentOverview() {
+            // Budget overview
+            const budgetContainer = document.getElementById('parentBudgetView');
+            const weekBudgets = appData.budgets.filter(b => b.week === currentWeek);
+            
+            if (weekBudgets.length === 0) {
+                budgetContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <p class="empty-state-text">ลูกยังไม่ได้วางแผนงบประมาณ</p>
+                    </div>
+                `;
+            } else {
+                budgetContainer.innerHTML = weekBudgets.map(budget => {
+                    const expenses = appData.expenses.filter(e => 
+                        e.categoryId == budget.categoryId && e.week === currentWeek
+                    );
+                    const spent = expenses.reduce((sum, e) => sum + e.amount, 0);
+                    const percent = Math.min((spent / budget.amount) * 100, 100);
+                    const progressClass = percent > 90 ? 'danger' : percent > 70 ? 'warning' : 'good';
+                    
+                    return `
+                        <div class="data-item">
+                            <div class="data-item-left">
+                                <div class="data-item-icon" style="background: ${getRandomColor()}20;">
+                                    ${budget.categoryEmoji}
+                                </div>
+                                <div class="data-item-info">
+                                    <h4>${budget.categoryName}</h4>
+                                    <div class="progress-container">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill ${progressClass}" style="width: ${percent}%"></div>
+                                        </div>
+                                        <div class="progress-text">ใช้ไป ${formatMoney(spent)} / ${formatMoney(budget.amount)} (${percent.toFixed(0)}%)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            // Expense overview
+            const expenseContainer = document.getElementById('parentExpenseView');
+            const weekExpenses = appData.expenses.filter(e => e.week === currentWeek);
+            
+            if (weekExpenses.length === 0) {
+                expenseContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <p class="empty-state-text">ลูกยังไม่มีรายจ่ายในสัปดาห์นี้</p>
+                    </div>
+                `;
+            } else {
+                expenseContainer.innerHTML = weekExpenses.map(expense => {
+                    const date = new Date(expense.date);
+                    const dateStr = date.toLocaleDateString('th-TH', { 
+                        weekday: 'short', 
+                        day: 'numeric', 
+                        month: 'short' 
+                    });
+                    
+                    return `
+                        <div class="data-item">
+                            <div class="data-item-left">
+                                <div class="data-item-icon" style="background: #FADBD820;">
+                                    ${expense.categoryEmoji}
+                                </div>
+                                <div class="data-item-info">
+                                    <h4>${expense.description}</h4>
+                                    <p>${expense.categoryName} • ${dateStr}</p>
+                                </div>
+                            </div>
+                            <div class="data-item-right">
+                                <div class="data-item-amount expense">-${formatMoney(expense.amount)}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function getRandomColor() {
+            const colors = ['#FF6B35', '#4ECDC4', '#FFE66D', '#6C5CE7', '#E74C3C', '#2ECC71'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        // ===== CLOSE MODAL ON OUTSIDE CLICK =====
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // ===== INITIALIZE =====
+        loadData();
+    </script>
+</body>
+</html>
